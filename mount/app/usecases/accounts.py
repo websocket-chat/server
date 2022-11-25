@@ -9,7 +9,7 @@ async def signup(
     ctx: Context,
     email_address: str,
     password: str,
-    name: str,
+    username: str,
 ) -> typing.Mapping[str, typing.Any] | ServiceError:
     repo = AccountsRepo(ctx)
 
@@ -22,7 +22,7 @@ async def signup(
     account = await repo.sign_up(
         email_address=email_address,
         password=password,
-        name=name,
+        username=username,
     )
     if account is None:
         return ServiceError.ACCOUNTS_SIGNUP_FAILED

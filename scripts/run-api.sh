@@ -14,7 +14,7 @@ fi
 
 exec uvicorn \
     --host $APP_HOST \
-    --port $APP_PORT \
+    --port $APP_INTERNAL_PORT \
     --no-access-log \
     $EXTRA_PARAMS \
-    app.api_boot:api
+    app.api_boot:app

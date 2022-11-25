@@ -31,7 +31,8 @@ services:
     environment:
       # asgi + app
       - APP_HOST=${APP_HOST}
-      - APP_PORT=${APP_PORT}
+      - APP_EXTERNAL_PORT=${APP_EXTERNAL_PORT}
+      - APP_INTERNAL_PORT=${APP_INTERNAL_PORT}
       - APP_ENV=${APP_ENV}
       - APP_COMPONENT=${APP_COMPONENT}
       - APP_LOG_LEVEL=${APP_LOG_LEVEL}

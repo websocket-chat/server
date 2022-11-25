@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 from uuid import UUID
 from uuid import uuid4

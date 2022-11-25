@@ -3,8 +3,8 @@ import time
 import aioredis
 import databases
 from app.adapters.database import dsn
-from app.api.rest.v1 import router as rest_v1_router
-from app.api.websocket.v1 import router as websocket_v1_router
+from app.api.rest import router as rest_router
+from app.api.websocket import router as websocket_router
 from app.common import logger
 from app.common import settings
 from fastapi import FastAPI
@@ -38,16 +38,16 @@ def init_db(api: FastAPI) -> None:
 def init_redis(api: FastAPI) -> None:
     @api.on_event("startup")
     async def startup_redis() -> None:
-        redis = await aioredis.from_url(
+        redis = aioredis.from_url(
             f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}"
         )
         api.state.redis = redis
+        await api.state.redis.initialize()
         logger.info("Redis pool started up")
 
     @api.on_event("shutdown")
     async def shutdown_redis() -> None:
-        api.state.redis.close()
-        await api.state.redis.wait_closed()
+        await api.state.redis.close()
         del api.state.redis
         logger.info("Redis pool shut down")
 
@@ -78,8 +78,8 @@ def init_middlewares(api: FastAPI) -> None:
 
 
 def init_routes(api: FastAPI) -> None:
-    api.include_router(rest_v1_router)
-    api.include_router(websocket_v1_router)
+    api.include_router(rest_router)
+    api.include_router(websocket_router)
 
 
 def init_api():

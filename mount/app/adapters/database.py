@@ -1,8 +1,3 @@
-import databases
-
-import mount.app.common.settings as settings
-
-
 def dsn(
     db_driver: str,
     db_host: str,
