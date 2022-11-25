@@ -3,8 +3,8 @@ import time
 import aioredis
 import databases
 from app.adapters.database import dsn
-from app.api.rest.v1 import router
-from app.api.websocket.v1 import router
+from app.api.rest.v1 import router as rest_v1_router
+from app.api.websocket.v1 import router as websocket_v1_router
 from app.common import logger
 from app.common import settings
 from fastapi import FastAPI
@@ -78,9 +78,8 @@ def init_middlewares(api: FastAPI) -> None:
 
 
 def init_routes(api: FastAPI) -> None:
-    from .v1 import router as v1_router
-
-    api.include_router(v1_router)
+    api.include_router(rest_v1_router)
+    api.include_router(websocket_v1_router)
 
 
 def init_api():

@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+APP_ENV = os.environ["APP_ENV"]
+APP_LOG_LEVEL = os.environ["APP_LOG_LEVEL"]
+
 DB_DRIVER = os.environ["DB_DRIVER"]
 DB_HOST = os.environ["DB_HOST"]
 DB_PORT = int(os.environ["DB_PORT"])

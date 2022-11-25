@@ -1,0 +1,52 @@
+version: "3.3"
+
+# networks:
+#   default:
+#     driver: bridge
+
+services:
+  ## shared/managed services
+
+  mysql:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+    restart: always
+    volumes:
+      - ./mysql:/var/lib/mysql
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+
+  redis:
+    image: redis
+    restart: always
+    command: redis-server
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+
+  server:
+    image: server:latest
+    ports:
+      - ${APP_EXTERNAL_PORT}:${APP_INTERNAL_PORT}
+    environment:
+      # asgi + app
+      - APP_HOST=${APP_HOST}
+      - APP_PORT=${APP_PORT}
+      - APP_ENV=${APP_ENV}
+      - APP_COMPONENT=${APP_COMPONENT}
+      - APP_LOG_LEVEL=${APP_LOG_LEVEL}
+      - DB_DRIVER=${DB_DRIVER}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USE_SSL=${DB_USE_SSL}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    volumes:
+      - ./mount:/srv/root
+      - ./scripts:/scripts
+    depends_on:
+      - mysql
+      - redis
