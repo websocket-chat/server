@@ -1,7 +1,6 @@
+from app.api.websocket import v1
 from fastapi import APIRouter
-
-from .v1 import router
 
 router = APIRouter()
 
-router.include_router(router, tags=["v1"])
+router.include_router(v1.router)
