@@ -13,8 +13,26 @@ from fastapi import status
 router = APIRouter()
 
 
+def get_status_code(error: ServiceError) -> int:
+    if error is ServiceError.ACCOUNTS_SIGNUP_FAILED:
+        return status.HTTP_500_INTERNAL_SERVER_ERROR
+    elif error is ServiceError.ACCOUNTS_USERNAME_EXISTS:
+        return status.HTTP_409_CONFLICT
+    elif error is ServiceError.ACCOUNTS_EMAIL_ADDRESS_EXISTS:
+        return status.HTTP_409_CONFLICT
+    elif error is ServiceError.ACCOUNTS_USERNAME_INVALID:
+        return status.HTTP_400_BAD_REQUEST
+    elif error is ServiceError.ACCOUNTS_EMAIL_ADDRESS_INVALID:
+        return status.HTTP_400_BAD_REQUEST
+    elif error is ServiceError.ACCOUNTS_PASSWORD_INVALID:
+        return status.HTTP_400_BAD_REQUEST
+
+    logger.error("Unhandled service error: ", error=error)
+    return status.HTTP_500_INTERNAL_SERVER_ERROR
+
+
 @router.post("/v1/accounts", response_model=Success[Account])
-async def create_account(args: SignupForm, ctx: RequestContext = Depends()):
+async def signup(args: SignupForm, ctx: RequestContext = Depends()):
     data = await accounts.signup(
         ctx,
         email_address=args.email_address,
@@ -22,19 +40,46 @@ async def create_account(args: SignupForm, ctx: RequestContext = Depends()):
         username=args.username,
     )
     if isinstance(data, ServiceError):
-        if data is ServiceError.ACCOUNTS_EMAIL_ADDRESS_EXISTS:
-            status_code = status.HTTP_409_CONFLICT
-        elif data is ServiceError.ACCOUNTS_SIGNUP_FAILED:
-            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        else:
-            logger.error("Unhandled service error: ", error=data)
-            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-
         return responses.failure(
             error=data,
             message="Failed to create account",
-            status_code=status_code,
+            status_code=get_status_code(data),
         )
 
     resp = Account.from_mapping(data)
     return responses.success(resp, status_code=status.HTTP_201_CREATED)
+
+
+@router.get("/v1/accounts", response_model=Success[list[Account]])
+async def fetch_many(
+    page: int = 1,
+    page_size: int = 10,
+    ctx: RequestContext = Depends(),
+):
+    data = await accounts.fetch_many(ctx, page=page, page_size=page_size)
+    if isinstance(data, ServiceError):
+        return responses.failure(
+            error=data,
+            message="Failed to fetch accounts",
+            status_code=get_status_code(data),
+        )
+
+    resp = [Account.from_mapping(rec) for rec in data]
+    return responses.success(resp, status_code=status.HTTP_200_OK)
+
+
+@router.get("/v1/accounts/{account_id}", response_model=Success[Account])
+async def fetch_one(
+    account_id: int,
+    ctx: RequestContext = Depends(),
+):
+    data = await accounts.fetch_one(ctx, account_id=account_id)
+    if isinstance(data, ServiceError):
+        return responses.failure(
+            error=data,
+            message="Failed to fetch account",
+            status_code=get_status_code(data),
+        )
+
+    resp = Account.from_mapping(data)
+    return responses.success(resp, status_code=status.HTTP_200_OK)

@@ -61,3 +61,19 @@ class AccountsRepo:
         }
         rec = await self.ctx.db.fetch_one(query, params)
         return rec._mapping if rec is not None else None
+
+    async def fetch_many(
+        self, page: int, page_size: int
+    ) -> list[typing.Mapping[str, typing.Any]]:
+        query = f"""\
+            SELECT {self.READ_PARAMS}
+              FROM accounts
+             LIMIT :page_size
+            OFFSET :offset
+        """
+        params = {
+            "page_size": page_size,
+            "offset": (page - 1) * page_size,
+        }
+        recs = await self.ctx.db.fetch_all(query, params)
+        return [rec._mapping for rec in recs]
