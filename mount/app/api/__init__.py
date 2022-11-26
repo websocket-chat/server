@@ -80,7 +80,7 @@ def init_middlewares(api: FastAPI) -> None:
     # TODO: staging/production origins
     CORS_ORIGINS = [
         "http://localhost",
-        "http://localhost:3080",
+        "http://localhost:8080",
     ]
 
     api.add_middleware(
