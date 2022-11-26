@@ -7,6 +7,10 @@ from app.models import Status
 
 
 class AccountsRepo:
+    READ_PARAMS = """\
+        id, email_address, password, username, status, created_at, updated_at
+    """
+
     def __init__(self, ctx: Context) -> None:
         self.ctx = ctx
 
@@ -29,8 +33,8 @@ class AccountsRepo:
         insert_id = await self.ctx.db.execute(query, params)
         assert insert_id is not None
 
-        query = """\
-            SELECT id, email_address, username
+        query = f"""\
+            SELECT {self.READ_PARAMS}
               FROM accounts
              WHERE id = :id
         """
@@ -44,8 +48,8 @@ class AccountsRepo:
         email_address: str | None = None,
         username: str | None = None,
     ) -> typing.Mapping[str, typing.Any] | None:
-        query = """\
-            SELECT id, email_address, username
+        query = f"""\
+            SELECT {self.READ_PARAMS}
               FROM accounts
              WHERE id = COALESCE(:id, id)
                AND email_address = COALESCE(:email_address, email_address)
