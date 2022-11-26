@@ -53,10 +53,6 @@ async def logout(
     http_credentials: HTTPAuthorizationCredentials = Depends(http_scheme),
     ctx: RequestContext = Depends(),
 ):
-    data = await sessions.fetch_one(ctx, session_id=http_credentials.credentials)
-    if isinstance(data, ServiceError):
-        return data
-
     data = await sessions.logout(ctx, session_id=http_credentials.credentials)
     if isinstance(data, ServiceError):
         if data is ServiceError.SESSIONS_NOT_FOUND:
@@ -65,11 +61,7 @@ async def logout(
             logger.error("Unhandled service error: ", error=data)
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-        return responses.failure(
-            error=data,
-            message="Failed to delete session",
-            status_code=status_code,
-        )
+        return responses.failure(data, "Failed to log out of session", status_code)
 
     resp = Session.from_mapping(data)
     return responses.success(resp, status_code=status.HTTP_201_CREATED)

@@ -6,6 +6,7 @@ from datetime import datetime
 from uuid import UUID
 
 from app.common.context import Context
+
 # from datetime import timedelta
 
 
@@ -39,7 +40,7 @@ class SessionsRepo:
         assert isinstance(session, dict)
         session["session_id"] = UUID(session["session_id"])
         session["account_id"] = int(session["account_id"])
-        session["expires_at"] = datetime.fromisoformat(session["expires_at"])
+        # session["expires_at"] = datetime.fromisoformat(session["expires_at"])
         session["created_at"] = datetime.fromisoformat(session["created_at"])
         session["updated_at"] = datetime.fromisoformat(session["updated_at"])
         return session
