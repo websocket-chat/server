@@ -3,6 +3,7 @@ from uuid import UUID
 
 from app.common import security
 from app.common.context import Context
+from app.models import Status
 
 
 class AccountsRepo:
@@ -16,13 +17,14 @@ class AccountsRepo:
         username: str,
     ) -> typing.Mapping[str, typing.Any] | None:
         query = """\
-            INSERT INTO accounts (email_address, password, username)
-                 VALUES (:email_address, :password, :username)
+            INSERT INTO accounts (email_address, password, username, status)
+                 VALUES (:email_address, :password, :username, :status)
         """
         params = {
             "email_address": email_address,
             "password": security.hash_password(password),
             "username": username,
+            "status": Status.ACTIVE,
         }
         insert_id = await self.ctx.db.execute(query, params)
         assert insert_id is not None
