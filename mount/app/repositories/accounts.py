@@ -30,7 +30,7 @@ class AccountsRepo:
         assert insert_id is not None
 
         query = """\
-            SELECT id, email_address, name
+            SELECT id, email_address, username
               FROM accounts
              WHERE id = :id
         """
@@ -45,7 +45,7 @@ class AccountsRepo:
         username: str | None = None,
     ) -> typing.Mapping[str, typing.Any] | None:
         query = """\
-            SELECT id, email_address, name
+            SELECT id, email_address, username
               FROM accounts
              WHERE id = COALESCE(:id, id)
                AND email_address = COALESCE(:email_address, email_address)
