@@ -37,4 +37,4 @@ async def create_account(args: SignupForm, ctx: RequestContext = Depends()):
         )
 
     resp = Account.from_mapping(data)
-    return responses.success(resp)
+    return responses.success(resp, status_code=status.HTTP_201_CREATED)
