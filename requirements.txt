@@ -2,7 +2,7 @@ aioredis
 bcrypt
 databases[aiomysql]
 fastapi
+orjson
 python_dotenv
 structlog
-orjson
 uvicorn

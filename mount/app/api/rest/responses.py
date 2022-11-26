@@ -1,7 +1,7 @@
 import typing
 
-from app.common.json import JSONResponse
 from app.common.errors import ServiceError
+from app.common.json import ORJSONResponse
 from pydantic.generics import GenericModel
 
 T = typing.TypeVar("T")
@@ -16,9 +16,9 @@ def success(
     content: typing.Any,
     status_code: int = 200,
     headers: dict | None = None,
-) -> JSONResponse:
+) -> ORJSONResponse:
     data = {"status": "success", "data": content}
-    return JSONResponse(data, status_code, headers)
+    return ORJSONResponse(data, status_code, headers)
 
 
 class ErrorResponse(GenericModel, typing.Generic[T]):
@@ -32,6 +32,6 @@ def failure(
     message: str,
     status_code: int = 400,
     headers: dict | None = None,
-) -> JSONResponse:
+) -> ORJSONResponse:
     data = {"status": "error", "error": error, "message": message}
-    return JSONResponse(data, status_code, headers)
+    return ORJSONResponse(data, status_code, headers)
