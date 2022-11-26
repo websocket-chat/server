@@ -14,18 +14,16 @@ if typing.TYPE_CHECKING:
     from fastapi import WebSocket
 
 
-async def authenticate(
+async def login(
     ctx: Context,
-    email_address: str,
+    username: str,
     password: str,
     user_agent: str,
 ) -> typing.Mapping[str, typing.Any] | ServiceError:
     s_repo = SessionsRepo(ctx)
     a_repo = AccountsRepo(ctx)
 
-    account = await a_repo.fetch_one(
-        email_address=email_address,
-    )
+    account = await a_repo.fetch_one(username=username)
     if account is None:
         return ServiceError.CREDENTIALS_INCORRECT
 
