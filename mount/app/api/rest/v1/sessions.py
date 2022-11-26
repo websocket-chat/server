@@ -17,6 +17,16 @@ http_scheme = HTTPBearer()
 router = APIRouter()
 
 
+def get_status_code(error: ServiceError) -> int:
+    if error is ServiceError.SESSIONS_NOT_FOUND:
+        return status.HTTP_400_BAD_REQUEST
+    elif error is ServiceError.CREDENTIALS_INCORRECT:
+        return status.HTTP_401_UNAUTHORIZED
+
+    logger.error("Unhandled service error: ", error=error)
+    return status.HTTP_500_INTERNAL_SERVER_ERROR
+
+
 @router.post("/v1/sessions", response_model=Success[Session])
 async def login(
     args: LoginForm,
@@ -30,16 +40,10 @@ async def login(
         user_agent=user_agent,
     )
     if isinstance(data, ServiceError):
-        if data is ServiceError.CREDENTIALS_INCORRECT:
-            status_code = status.HTTP_401_UNAUTHORIZED
-        else:
-            logger.error("Unhandled service error: ", error=data)
-            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-
         return responses.failure(
             error=data,
             message="Failed to create session",
-            status_code=status_code,
+            status_code=get_status_code(data),
         )
 
     resp = Session.from_mapping(data)
@@ -53,13 +57,11 @@ async def logout(
 ):
     data = await sessions.logout(ctx, session_id=http_credentials.credentials)
     if isinstance(data, ServiceError):
-        if data is ServiceError.SESSIONS_NOT_FOUND:
-            status_code = status.HTTP_404_NOT_FOUND
-        else:
-            logger.error("Unhandled service error: ", error=data)
-            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-
-        return responses.failure(data, "Failed to log out of session", status_code)
+        return responses.failure(
+            error=data,
+            message="Failed to log out of session",
+            status_code=get_status_code(data),
+        )
 
     resp = Session.from_mapping(data)
     return responses.success(resp, status_code=status.HTTP_201_CREATED)
