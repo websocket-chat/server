@@ -1,6 +1,7 @@
 aioredis
 bcrypt
 databases[aiomysql]
+email-validator
 fastapi
 orjson
 python_dotenv
