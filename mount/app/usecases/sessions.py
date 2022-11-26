@@ -50,7 +50,7 @@ async def fetch_one(
 
 async def fetch_many(
     ctx: Context,
-    account_id: UUID | None = None,
+    account_id: int | None = None,
     user_agent: str | None = None,
 ) -> typing.List[typing.Mapping[str, typing.Any]]:
     repo = SessionsRepo(ctx)

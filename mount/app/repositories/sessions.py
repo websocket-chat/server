@@ -3,15 +3,13 @@ from __future__ import annotations
 import json
 import typing
 from datetime import datetime
-from datetime import timedelta
 from uuid import UUID
 
 from app.common.context import Context
+# from datetime import timedelta
 
-if typing.TYPE_CHECKING:
-    from fastapi import WebSocket
 
-SESSION_EXPIRY = 3600  # 1h
+# SESSION_EXPIRY = 3600  # 1h
 
 
 class SessionsRepo:
@@ -40,7 +38,7 @@ class SessionsRepo:
         session = json.loads(raw_session)
         assert isinstance(session, dict)
         session["session_id"] = UUID(session["session_id"])
-        session["account_id"] = UUID(session["account_id"])
+        session["account_id"] = int(session["account_id"])
         session["expires_at"] = datetime.fromisoformat(session["expires_at"])
         session["created_at"] = datetime.fromisoformat(session["created_at"])
         session["updated_at"] = datetime.fromisoformat(session["updated_at"])
@@ -49,7 +47,7 @@ class SessionsRepo:
     async def create(
         self,
         session_id: UUID,
-        account_id: UUID,
+        account_id: int,
         user_agent: str,
     ) -> typing.Mapping[str, typing.Any]:
         now = datetime.now()
@@ -84,7 +82,7 @@ class SessionsRepo:
 
     async def fetch_many(
         self,
-        account_id: UUID | None = None,
+        account_id: int | None = None,
         user_agent: str | None = None,
         page: int = 1,
         page_size: int = 10,

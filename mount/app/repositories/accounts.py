@@ -44,7 +44,7 @@ class AccountsRepo:
 
     async def fetch_one(
         self,
-        account_id: UUID | None = None,
+        account_id: int | None = None,
         email_address: str | None = None,
         username: str | None = None,
     ) -> typing.Mapping[str, typing.Any] | None:
