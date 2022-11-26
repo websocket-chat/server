@@ -9,6 +9,7 @@ from app.common import logger
 from app.common import settings
 from fastapi import FastAPI
 from fastapi import Request
+from fastapi.middleware.cors import CORSMiddleware
 
 
 def init_db(api: FastAPI) -> None:
@@ -75,6 +76,20 @@ def init_middlewares(api: FastAPI) -> None:
         process_time = (time.perf_counter_ns() - start_time) / 1e6
         response.headers["X-Process-Time"] = str(process_time)  # ms
         return response
+
+    # TODO: staging/production origins
+    CORS_ORIGINS = [
+        "http://localhost",
+        "http://localhost:3080",
+    ]
+
+    api.add_middleware(
+        CORSMiddleware,
+        allow_origins=CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 
 def init_routes(api: FastAPI) -> None:
