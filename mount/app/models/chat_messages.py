@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from . import BaseModel
 
 # input models

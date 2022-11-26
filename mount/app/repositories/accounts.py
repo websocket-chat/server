@@ -1,5 +1,4 @@
 import typing
-from uuid import UUID
 
 from app.common import security
 from app.common.context import Context

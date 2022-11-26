@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from app.api.authentication import HTTPAuthorizationCredentials
 from app.api.authentication import HTTPBearer
 from app.api.context import RequestContext
