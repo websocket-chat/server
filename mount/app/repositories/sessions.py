@@ -53,7 +53,8 @@ class SessionsRepo:
     async def fetch_one(
         self, session_id: UUID
     ) -> typing.Mapping[str, typing.Any] | None:
-        session = await self.ctx.redis.get(self.make_key(session_id))
+        session_key = self.make_key(session_id)
+        session = await self.ctx.redis.get(session_key)
         return json.loads(session) if session is not None else None
 
     # TODO: fetch_all
@@ -98,37 +99,12 @@ class SessionsRepo:
 
         return sessions
 
-    # websockets
+    async def delete(self, session_id: UUID) -> typing.Mapping[str, typing.Any] | None:
+        session_key = self.make_key(session_id)
 
-    async def add_websocket(
-        self,
-        session_id: UUID,
-        websocket: WebSocket,
-    ) -> typing.Mapping[str, typing.Any] | None:
-        session = await self.fetch_one(session_id)
+        session = await self.ctx.redis.get(session_key)
         if session is None:
             return None
 
-        session = dict(session)
-        session["websocket"] = websocket
-        await self.ctx.redis.set(
-            name=self.make_key(session_id),
-            value=json.dumps(session),
-        )
-        return session
-
-    async def remove_websocket(
-        self,
-        session_id: UUID,
-    ) -> typing.Mapping[str, typing.Any] | None:
-        session = await self.fetch_one(session_id)
-        if session is None:
-            return None
-
-        session = dict(session)
-        session["websocket"] = None
-        await self.ctx.redis.set(
-            name=self.make_key(session_id),
-            value=json.dumps(session),
-        )
+        await self.ctx.redis.delete(session_key)
         return session

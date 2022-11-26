@@ -10,9 +10,6 @@ from app.common.security import verify_password
 from app.repositories.accounts import AccountsRepo
 from app.repositories.sessions import SessionsRepo
 
-if typing.TYPE_CHECKING:
-    from fastapi import WebSocket
-
 
 async def login(
     ctx: Context,
@@ -42,9 +39,12 @@ async def login(
 async def fetch_one(
     ctx: Context,
     session_id: UUID,
-) -> typing.Mapping[str, typing.Any] | None:
+) -> typing.Mapping[str, typing.Any] | ServiceError:
     repo = SessionsRepo(ctx)
     session = await repo.fetch_one(session_id)
+    if session is None:
+        return ServiceError.SESSIONS_NOT_FOUND
+
     return session
 
 
@@ -61,29 +61,13 @@ async def fetch_many(
     return sessions
 
 
-# websockets
-
-
-async def add_websocket(
-    ctx: Context,
-    session_id: UUID,
-    websocket: WebSocket,
+async def logout(
+    ctx: Context, session_id: UUID
 ) -> typing.Mapping[str, typing.Any] | ServiceError:
     repo = SessionsRepo(ctx)
-    session = await repo.add_websocket(session_id, websocket)
+    session = await repo.fetch_one(session_id)
     if session is None:
         return ServiceError.SESSIONS_NOT_FOUND
 
-    return session
-
-
-async def remove_websocket(
-    ctx: Context,
-    session_id: UUID,
-) -> typing.Mapping[str, typing.Any] | ServiceError:
-    repo = SessionsRepo(ctx)
-    session = await repo.remove_websocket(session_id)
-    if session is None:
-        return ServiceError.SESSIONS_NOT_FOUND
-
+    await repo.delete(session_id)
     return session

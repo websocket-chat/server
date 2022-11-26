@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from app.api.context import RequestContext
+from app.common import logger
 from app.common.errors import ServiceError
 from app.models import ClientMessages
 from app.models import Message
@@ -19,6 +20,10 @@ router = APIRouter()
 
 # TODO: responses module
 
+# TODO: track which hosts have which websockets in redis?
+# that way this could be distributed (i suppose)
+WEBSOCKETS: dict[UUID, WebSocket] = {}
+
 
 @router.websocket("/ws")
 async def websocket_endpoint(
@@ -29,9 +34,11 @@ async def websocket_endpoint(
 
     session_id = UUID(await websocket.receive_text())
 
-    session = await sessions.add_websocket(ctx, session_id, websocket)
+    session = await sessions.fetch_one(ctx, session_id)
     if isinstance(session, ServiceError):  # session does not exist
         raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+
+    WEBSOCKETS[session_id] = websocket
 
     # tell the client they were accepted
     await websocket.send_json(
@@ -69,5 +76,10 @@ async def websocket_endpoint(
         elif raw_data.message_type == ClientMessages.LOG_OUT:
             break
 
-    await sessions.remove_websocket(ctx, session_id)
+    del WEBSOCKETS[session_id]
+    data = await sessions.logout(ctx, session_id)
+    if isinstance(data, ServiceError):
+        # we won't raise an exception here, but this is weird
+        logger.error("Failed to logout session", error=data)
+
     await websocket.close()
