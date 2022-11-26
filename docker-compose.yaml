@@ -11,6 +11,7 @@ services:
     image: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_PASS}
+      - MYSQL_TCP_PORT=${DB_PORT}
     restart: always
     volumes:
       - ./mysql:/var/lib/mysql
