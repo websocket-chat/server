@@ -1,7 +1,7 @@
 import typing
 
+from app.common.json import JSONResponse
 from app.common.errors import ServiceError
-from fastapi.responses import JSONResponse
 from pydantic.generics import GenericModel
 
 T = typing.TypeVar("T")

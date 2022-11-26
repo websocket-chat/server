@@ -4,4 +4,5 @@ databases[aiomysql]
 fastapi
 python_dotenv
 structlog
+orjson
 uvicorn
