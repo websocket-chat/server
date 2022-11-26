@@ -97,7 +97,7 @@ def init_routes(api: FastAPI) -> None:
     api.include_router(websocket_router)
 
 
-def init_api():
+def init_api() -> FastAPI:
     api = FastAPI()
 
     init_db(api)
