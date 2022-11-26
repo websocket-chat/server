@@ -22,6 +22,30 @@ class SessionsRepo:
     def make_key(session_id: UUID | typing.Literal["*"]) -> str:
         return f"server:sessions:{session_id}"
 
+    @staticmethod
+    def serialize(session: typing.Mapping[str, typing.Any]) -> str:
+        return json.dumps(
+            {
+                "session_id": str(session["session_id"]),
+                "account_id": str(session["account_id"]),
+                "user_agent": session["user_agent"],
+                # "expires_at": session["expires_at"].isoformat(),
+                "created_at": session["created_at"].isoformat(),
+                "updated_at": session["updated_at"].isoformat(),
+            }
+        )
+
+    @staticmethod
+    def deserialize(raw_session: str) -> typing.Mapping[str, typing.Any]:
+        session = json.loads(raw_session)
+        assert isinstance(session, dict)
+        session["session_id"] = UUID(session["session_id"])
+        session["account_id"] = UUID(session["account_id"])
+        session["expires_at"] = datetime.fromisoformat(session["expires_at"])
+        session["created_at"] = datetime.fromisoformat(session["created_at"])
+        session["updated_at"] = datetime.fromisoformat(session["updated_at"])
+        return session
+
     async def create(
         self,
         session_id: UUID,
@@ -37,16 +61,15 @@ class SessionsRepo:
             # "expires_at": expires_at,
             "created_at": now,
             "updated_at": now,
-            "websocket": None,
         }
         await self.ctx.redis.set(
             name=self.make_key(session_id),
-            value=json.dumps(session),
+            value=self.serialize(session),
         )
         # await self.ctx.redis.setex(
         #     name=self.make_key(session_id),
         #     time=SESSION_EXPIRY,
-        #     value=json.dumps(session),
+        #     value=self.serialize(session),
         # )
         return session
 
@@ -55,7 +78,7 @@ class SessionsRepo:
     ) -> typing.Mapping[str, typing.Any] | None:
         session_key = self.make_key(session_id)
         session = await self.ctx.redis.get(session_key)
-        return json.loads(session) if session is not None else None
+        return self.deserialize(session) if session is not None else None
 
     # TODO: fetch_all
 
@@ -87,7 +110,7 @@ class SessionsRepo:
 
             raw_sessions = await self.ctx.redis.mget(keys)
             for raw_session in raw_sessions:
-                session = json.loads(raw_session)
+                session = self.deserialize(raw_session)
 
                 if account_id is not None and session["account_id"] != account_id:
                     continue
@@ -107,4 +130,4 @@ class SessionsRepo:
             return None
 
         await self.ctx.redis.delete(session_key)
-        return session
+        return self.deserialize(session)
