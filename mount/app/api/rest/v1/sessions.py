@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from app.api.authentication import HTTPAuthorizationCredentials
 from app.api.authentication import HTTPBearer
 from app.api.context import RequestContext
@@ -48,6 +50,49 @@ async def login(
 
     resp = Session.from_mapping(data)
     return responses.success(resp, status_code=status.HTTP_201_CREATED)
+
+
+@router.get("/v1/sessions", response_model=Success[list[Session]])
+async def fetch_many(
+    account_id: int | None = None,
+    user_agent: str | None = None,
+    page: int = 1,
+    page_size: int = 10,
+    ctx: RequestContext = Depends(),
+):
+    data = await sessions.fetch_many(
+        ctx,
+        account_id=account_id,
+        user_agent=user_agent,
+        page=page,
+        page_size=page_size,
+    )
+    if isinstance(data, ServiceError):
+        return responses.failure(
+            error=data,
+            message="Failed to fetch sessions",
+            status_code=get_status_code(data),
+        )
+
+    resp = [Session.from_mapping(rec) for rec in data]
+    return responses.success(resp)
+
+
+@router.get("/v1/sessions/{session_id}", response_model=Success[Session])
+async def fetch_one(
+    session_id: UUID,
+    ctx: RequestContext = Depends(),
+):
+    data = await sessions.fetch_one(ctx, session_id=session_id)
+    if isinstance(data, ServiceError):
+        return responses.failure(
+            error=data,
+            message="Failed to fetch session",
+            status_code=get_status_code(data),
+        )
+
+    resp = Session.from_mapping(data)
+    return responses.success(resp)
 
 
 @router.delete("/v1/sessions", response_model=Success[Session])

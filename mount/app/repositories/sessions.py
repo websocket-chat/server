@@ -83,10 +83,10 @@ class SessionsRepo:
 
     async def fetch_many(
         self,
-        account_id: int | None = None,
-        user_agent: str | None = None,
-        page: int = 1,
-        page_size: int = 10,
+        account_id: int | None,
+        user_agent: str | None,
+        page: int,
+        page_size: int,
     ) -> list[typing.Mapping[str, typing.Any]]:
         session_key = self.make_key("*")
 

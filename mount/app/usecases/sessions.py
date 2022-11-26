@@ -50,13 +50,17 @@ async def fetch_one(
 
 async def fetch_many(
     ctx: Context,
-    account_id: int | None = None,
-    user_agent: str | None = None,
+    account_id: int | None,
+    user_agent: str | None,
+    page: int,
+    page_size: int,
 ) -> typing.List[typing.Mapping[str, typing.Any]]:
     repo = SessionsRepo(ctx)
     sessions = await repo.fetch_many(
         account_id=account_id,
         user_agent=user_agent,
+        page=page,
+        page_size=page_size,
     )
     return sessions
 
