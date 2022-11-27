@@ -51,27 +51,27 @@ async def websocket_endpoint(
     )
 
     try:
-    while True:
-        packet = Packet(**await websocket.receive_json())
+        while True:
+            packet = Packet(**await websocket.receive_json())
             logger.debug("Handling packet: ", packet=packet)
-        if packet.message_type == ClientMessages.SEND_CHAT_MESSAGE:
-            data = SendChatMessage(**packet.data)
+            if packet.message_type == ClientMessages.SEND_CHAT_MESSAGE:
+                data = SendChatMessage(**packet.data)
 
-            target_websockets = WEBSOCKETS[data.target_account_id]
-            for target_websocket in target_websockets:
-                await target_websocket.send_json(
-                    {
-                        "message_type": ClientMessages.SEND_CHAT_MESSAGE,
-                        "data": {
-                            "message_content": data.message_content,
-                            "sender_account_id": session["account_id"],
-                        },
-                    }
-                )
-        elif packet.message_type == ClientMessages.MARK_AS_READ:
-            pass
-        elif packet.message_type == ClientMessages.LOG_OUT:
-            break
+                target_websockets = WEBSOCKETS[data.target_account_id]
+                for target_websocket in target_websockets:
+                    await target_websocket.send_json(
+                        {
+                            "message_type": ClientMessages.SEND_CHAT_MESSAGE,
+                            "data": {
+                                "message_content": data.message_content,
+                                "sender_account_id": session["account_id"],
+                            },
+                        }
+                    )
+            elif packet.message_type == ClientMessages.MARK_AS_READ:
+                pass
+            elif packet.message_type == ClientMessages.LOG_OUT:
+                break
         pass
     except WebSocketDisconnect:
         pass
