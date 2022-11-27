@@ -14,6 +14,7 @@ from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import status
 from fastapi import WebSocket
+from fastapi import WebSocketDisconnect
 from fastapi import WebSocketException
 
 router = APIRouter()
@@ -49,6 +50,7 @@ async def websocket_endpoint(
         }
     )
 
+    try:
     while True:
         packet = Packet(**await websocket.receive_json())
         if packet.message_type == ClientMessages.SEND_CHAT_MESSAGE:
@@ -69,6 +71,11 @@ async def websocket_endpoint(
             pass
         elif packet.message_type == ClientMessages.LOG_OUT:
             break
+        pass
+    except WebSocketDisconnect:
+        pass
+    else:
+        await websocket.close()
 
     WEBSOCKETS[session["account_id"]].remove(websocket)
 
@@ -76,5 +83,5 @@ async def websocket_endpoint(
     if isinstance(data, ServiceError):
         # we won't raise an exception here, but this is weird
         logger.error("Failed to logout session", error=data)
-
-    await websocket.close()
+    else:
+        logger.info("Session logged out", data=data)
