@@ -1,4 +1,4 @@
-from app.api.context import RequestContext
+from app.api.context import HTTPRequestContext
 from app.api.rest import responses
 from app.api.rest.responses import Success
 from app.common import logger
@@ -32,7 +32,7 @@ def get_status_code(error: ServiceError) -> int:
 
 
 @router.post("/v1/accounts", response_model=Success[Account])
-async def signup(args: SignupForm, ctx: RequestContext = Depends()):
+async def signup(args: SignupForm, ctx: HTTPRequestContext = Depends()):
     data = await accounts.signup(
         ctx,
         email_address=args.email_address,
@@ -54,7 +54,7 @@ async def signup(args: SignupForm, ctx: RequestContext = Depends()):
 async def fetch_many(
     page: int = 1,
     page_size: int = 10,
-    ctx: RequestContext = Depends(),
+    ctx: HTTPRequestContext = Depends(),
 ):
     data = await accounts.fetch_many(ctx, page=page, page_size=page_size)
     if isinstance(data, ServiceError):
@@ -71,7 +71,7 @@ async def fetch_many(
 @router.get("/v1/accounts/{account_id}", response_model=Success[Account])
 async def fetch_one(
     account_id: int,
-    ctx: RequestContext = Depends(),
+    ctx: HTTPRequestContext = Depends(),
 ):
     data = await accounts.fetch_one(ctx, account_id=account_id)
     if isinstance(data, ServiceError):

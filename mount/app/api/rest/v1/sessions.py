@@ -2,7 +2,7 @@ from uuid import UUID
 
 from app.api.authentication import HTTPAuthorizationCredentials
 from app.api.authentication import HTTPBearer
-from app.api.context import RequestContext
+from app.api.context import HTTPRequestContext
 from app.api.rest import responses
 from app.api.rest.responses import Success
 from app.common import logger
@@ -33,7 +33,7 @@ def get_status_code(error: ServiceError) -> int:
 async def login(
     args: LoginForm,
     user_agent: str = Header(...),
-    ctx: RequestContext = Depends(),
+    ctx: HTTPRequestContext = Depends(),
 ):
     data = await sessions.login(
         ctx,
@@ -58,7 +58,7 @@ async def fetch_many(
     user_agent: str | None = None,
     page: int = 1,
     page_size: int = 10,
-    ctx: RequestContext = Depends(),
+    ctx: HTTPRequestContext = Depends(),
 ):
     data = await sessions.fetch_many(
         ctx,
@@ -81,7 +81,7 @@ async def fetch_many(
 @router.get("/v1/sessions/{session_id}", response_model=Success[Session])
 async def fetch_one(
     session_id: UUID,
-    ctx: RequestContext = Depends(),
+    ctx: HTTPRequestContext = Depends(),
 ):
     data = await sessions.fetch_one(ctx, session_id=session_id)
     if isinstance(data, ServiceError):
@@ -98,7 +98,7 @@ async def fetch_one(
 @router.delete("/v1/sessions", response_model=Success[Session])
 async def logout(
     http_credentials: HTTPAuthorizationCredentials = Depends(http_scheme),
-    ctx: RequestContext = Depends(),
+    ctx: HTTPRequestContext = Depends(),
 ):
     data = await sessions.logout(ctx, session_id=http_credentials.credentials)
     if isinstance(data, ServiceError):

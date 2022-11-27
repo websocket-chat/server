@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.api.context import RequestContext
+from app.api.context import WebSocketRequestContext
 from app.common import logger
 from app.common.errors import ServiceError
 from app.models import ClientMessages
@@ -28,7 +28,7 @@ WEBSOCKETS: dict[UUID, WebSocket] = {}
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
-    ctx: RequestContext = Depends(),
+    ctx: WebSocketRequestContext = Depends(),
 ):
     await websocket.accept()
 
