@@ -33,7 +33,7 @@ class ServerMessages(str, Enum):
     SEND_CHAT_MESSAGE = "SEND_CHAT_MESSAGE"
 
 
-class Message(BaseModel):
+class Packet(BaseModel):
     message_type: ClientMessages
 
     # to be parsed into a specific model using `message_type`
