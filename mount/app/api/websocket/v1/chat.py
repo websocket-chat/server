@@ -53,6 +53,7 @@ async def websocket_endpoint(
     try:
     while True:
         packet = Packet(**await websocket.receive_json())
+            logger.debug("Handling packet: ", packet=packet)
         if packet.message_type == ClientMessages.SEND_CHAT_MESSAGE:
             data = SendChatMessage(**packet.data)
 
