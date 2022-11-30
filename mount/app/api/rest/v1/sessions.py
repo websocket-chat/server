@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from app.api.authentication import HTTPAuthorizationCredentials
@@ -49,7 +50,20 @@ async def login(
         )
 
     resp = Session.from_mapping(data)
-    return responses.success(resp, status_code=status.HTTP_201_CREATED)
+    return responses.success(
+        resp,
+        status_code=status.HTTP_201_CREATED,
+        cookies=[
+            {
+                "key": "session_id",
+                "value": data["session_id"],
+                "httponly": True,
+                "secure": True,
+                "samesite": "strict",
+                "expires": int((data["expires_at"] - datetime.now()).total_seconds()),
+            }
+        ],
+    )
 
 
 @router.get("/v1/sessions", response_model=Success[list[Session]])

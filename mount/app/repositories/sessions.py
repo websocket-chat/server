@@ -3,14 +3,13 @@ from __future__ import annotations
 import json
 import typing
 from datetime import datetime
+from datetime import timedelta
 from uuid import UUID
 
 from app.common.context import Context
 
-# from datetime import timedelta
 
-
-# SESSION_EXPIRY = 3600  # 1h
+SESSION_EXPIRY = 60 * 60 * 24 * 30  # 30 days
 
 
 class SessionsRepo:
@@ -28,7 +27,7 @@ class SessionsRepo:
                 "session_id": str(session["session_id"]),
                 "account_id": str(session["account_id"]),
                 "user_agent": session["user_agent"],
-                # "expires_at": session["expires_at"].isoformat(),
+                "expires_at": session["expires_at"].isoformat(),
                 "created_at": session["created_at"].isoformat(),
                 "updated_at": session["updated_at"].isoformat(),
             }
@@ -40,7 +39,7 @@ class SessionsRepo:
         assert isinstance(session, dict)
         session["session_id"] = UUID(session["session_id"])
         session["account_id"] = int(session["account_id"])
-        # session["expires_at"] = datetime.fromisoformat(session["expires_at"])
+        session["expires_at"] = datetime.fromisoformat(session["expires_at"])
         session["created_at"] = datetime.fromisoformat(session["created_at"])
         session["updated_at"] = datetime.fromisoformat(session["updated_at"])
         return session
@@ -52,12 +51,12 @@ class SessionsRepo:
         user_agent: str,
     ) -> typing.Mapping[str, typing.Any]:
         now = datetime.now()
-        # expires_at = now + timedelta(seconds=SESSION_EXPIRY)
+        expires_at = now + timedelta(seconds=SESSION_EXPIRY)
         session = {
             "session_id": session_id,
             "account_id": account_id,
             "user_agent": user_agent,
-            # "expires_at": expires_at,
+            "expires_at": expires_at,
             "created_at": now,
             "updated_at": now,
         }
