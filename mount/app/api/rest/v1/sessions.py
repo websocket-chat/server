@@ -1,10 +1,10 @@
 from datetime import datetime
 from uuid import UUID
 
-from app.api.authentication import HTTPAuthorizationCredentials
-from app.api.authentication import HTTPBearer
 from app.api.context import HTTPRequestContext
 from app.api.rest import responses
+from app.api.rest.authentication import HTTPAuthorizationCredentials
+from app.api.rest.authentication import HTTPBearer
 from app.api.rest.responses import Success
 from app.common import logger
 from app.common.errors import ServiceError
@@ -16,7 +16,7 @@ from fastapi import Depends
 from fastapi import Header
 from fastapi import status
 
-http_scheme = HTTPBearer()
+http_scheme = HTTPBearer(auto_error=False)
 router = APIRouter()
 
 
@@ -111,9 +111,17 @@ async def fetch_one(
 
 @router.delete("/v1/sessions", response_model=Success[Session])
 async def logout(
-    http_credentials: HTTPAuthorizationCredentials = Depends(http_scheme),
+    http_credentials: HTTPAuthorizationCredentials | None = Depends(
+        http_scheme),
     ctx: HTTPRequestContext = Depends(),
 ):
+    if http_credentials is None:
+        return responses.failure(
+            error=ServiceError.SESSIONS_NOT_FOUND,
+            message="Failed to authenticate user",
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
     data = await sessions.logout(ctx, session_id=http_credentials.credentials)
     if isinstance(data, ServiceError):
         return responses.failure(
