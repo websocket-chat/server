@@ -34,7 +34,7 @@ class SessionsRepo:
         )
 
     @staticmethod
-    def deserialize(raw_session: str) -> typing.Mapping[str, typing.Any]:
+    def deserialize(raw_session: str) -> dict[str, typing.Any]:
         session = json.loads(raw_session)
         assert isinstance(session, dict)
         session["session_id"] = UUID(session["session_id"])
@@ -49,7 +49,7 @@ class SessionsRepo:
         session_id: UUID,
         account_id: int,
         user_agent: str,
-    ) -> typing.Mapping[str, typing.Any]:
+    ) -> dict[str, typing.Any]:
         now = datetime.now()
         expires_at = now + timedelta(seconds=SESSION_EXPIRY)
         session = {
@@ -71,9 +71,7 @@ class SessionsRepo:
         # )
         return session
 
-    async def fetch_one(
-        self, session_id: UUID
-    ) -> typing.Mapping[str, typing.Any] | None:
+    async def fetch_one(self, session_id: UUID) -> dict[str, typing.Any] | None:
         session_key = self.make_key(session_id)
         session = await self.ctx.redis.get(session_key)
         return self.deserialize(session) if session is not None else None
@@ -86,7 +84,7 @@ class SessionsRepo:
         user_agent: str | None,
         page: int,
         page_size: int,
-    ) -> list[typing.Mapping[str, typing.Any]]:
+    ) -> list[dict[str, typing.Any]]:
         session_key = self.make_key("*")
 
         if page > 1:
@@ -120,7 +118,7 @@ class SessionsRepo:
 
         return sessions
 
-    async def delete(self, session_id: UUID) -> typing.Mapping[str, typing.Any] | None:
+    async def delete(self, session_id: UUID) -> dict[str, typing.Any] | None:
         session_key = self.make_key(session_id)
 
         session = await self.ctx.redis.get(session_key)

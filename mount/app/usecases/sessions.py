@@ -16,7 +16,7 @@ async def login(
     username: str,
     password: str,
     user_agent: str,
-) -> typing.Mapping[str, typing.Any] | ServiceError:
+) -> dict[str, typing.Any] | ServiceError:
     s_repo = SessionsRepo(ctx)
     a_repo = AccountsRepo(ctx)
 
@@ -39,7 +39,7 @@ async def login(
 async def fetch_one(
     ctx: Context,
     session_id: UUID,
-) -> typing.Mapping[str, typing.Any] | ServiceError:
+) -> dict[str, typing.Any] | ServiceError:
     repo = SessionsRepo(ctx)
     session = await repo.fetch_one(session_id)
     if session is None:
@@ -54,7 +54,7 @@ async def fetch_many(
     user_agent: str | None,
     page: int,
     page_size: int,
-) -> typing.List[typing.Mapping[str, typing.Any]]:
+) -> list[dict[str, typing.Any]]:
     repo = SessionsRepo(ctx)
     sessions = await repo.fetch_many(
         account_id=account_id,
@@ -67,7 +67,7 @@ async def fetch_many(
 
 async def logout(
     ctx: Context, session_id: UUID
-) -> typing.Mapping[str, typing.Any] | ServiceError:
+) -> dict[str, typing.Any] | ServiceError:
     repo = SessionsRepo(ctx)
     session = await repo.fetch_one(session_id)
     if session is None:

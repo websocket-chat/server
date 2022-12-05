@@ -18,7 +18,7 @@ class AccountsRepo:
         email_address: str,
         password: str,
         username: str,
-    ) -> typing.Mapping[str, typing.Any] | None:
+    ) -> dict[str, typing.Any] | None:
         query = """\
             INSERT INTO accounts (email_address, password, username, status)
                  VALUES (:email_address, :password, :username, :status)
@@ -39,14 +39,14 @@ class AccountsRepo:
         """
         params = {"id": insert_id}
         rec = await self.ctx.db.fetch_one(query, params)
-        return rec._mapping if rec is not None else None
+        return dict(rec._mapping) if rec is not None else None
 
     async def fetch_one(
         self,
         account_id: int | None = None,
         email_address: str | None = None,
         username: str | None = None,
-    ) -> typing.Mapping[str, typing.Any] | None:
+    ) -> dict[str, typing.Any] | None:
         query = f"""\
             SELECT {self.READ_PARAMS}
               FROM accounts
@@ -60,11 +60,11 @@ class AccountsRepo:
             "username": username,
         }
         rec = await self.ctx.db.fetch_one(query, params)
-        return rec._mapping if rec is not None else None
+        return dict(rec._mapping) if rec is not None else None
 
     async def fetch_many(
         self, page: int, page_size: int
-    ) -> list[typing.Mapping[str, typing.Any]]:
+    ) -> list[dict[str, typing.Any]]:
         query = f"""\
             SELECT {self.READ_PARAMS}
               FROM accounts
@@ -76,4 +76,4 @@ class AccountsRepo:
             "offset": (page - 1) * page_size,
         }
         recs = await self.ctx.db.fetch_all(query, params)
-        return [rec._mapping for rec in recs]
+        return [dict(rec._mapping) for rec in recs]

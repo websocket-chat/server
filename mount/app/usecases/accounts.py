@@ -13,7 +13,7 @@ async def signup(
     email_address: str,
     password: str,
     username: str,
-) -> typing.Mapping[str, typing.Any] | ServiceError:
+) -> dict[str, typing.Any] | ServiceError:
     repo = AccountsRepo(ctx)
 
     # perform data validation
@@ -51,7 +51,7 @@ async def fetch_one(
     account_id: int | None = None,
     email_address: str | None = None,
     username: str | None = None,
-) -> typing.Mapping[str, typing.Any] | ServiceError:
+) -> dict[str, typing.Any] | ServiceError:
     repo = AccountsRepo(ctx)
 
     account = await repo.fetch_one(
@@ -69,7 +69,7 @@ async def fetch_many(
     ctx: Context,
     page: int,
     page_size: int,
-) -> typing.List[typing.Mapping[str, typing.Any]] | ServiceError:
+) -> list[dict[str, typing.Any]] | ServiceError:
     repo = AccountsRepo(ctx)
 
     accounts = await repo.fetch_many(page=page, page_size=page_size)
