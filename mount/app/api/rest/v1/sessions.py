@@ -21,13 +21,13 @@ router = APIRouter()
 
 
 def get_status_code(error: ServiceError) -> int:
-    if error is ServiceError.SESSIONS_NOT_FOUND:
-        return status.HTTP_400_BAD_REQUEST
-    elif error is ServiceError.CREDENTIALS_INCORRECT:
+    if error is ServiceError.CREDENTIALS_INCORRECT:
         return status.HTTP_401_UNAUTHORIZED
-
-    logger.error("Unhandled service error: ", error=error)
-    return status.HTTP_500_INTERNAL_SERVER_ERROR
+    elif error is ServiceError.SESSIONS_NOT_FOUND:
+        return status.HTTP_404_NOT_FOUND
+    else:
+        logger.error("Unhandled service error: ", error=error)
+        return status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
 @router.post("/v1/sessions", response_model=Success[Session])
@@ -57,9 +57,9 @@ async def login(
             {
                 "key": "session_id",
                 "value": data["session_id"],
-                "httponly": True,
-                "secure": True,
-                "samesite": "strict",
+                "httponly": False,
+                "secure": False,
+                "samesite": "lax",
                 "expires": int((data["expires_at"] - datetime.now()).total_seconds()),
             }
         ],

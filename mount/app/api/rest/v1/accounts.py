@@ -26,9 +26,11 @@ def get_status_code(error: ServiceError) -> int:
         return status.HTTP_400_BAD_REQUEST
     elif error is ServiceError.ACCOUNTS_PASSWORD_INVALID:
         return status.HTTP_400_BAD_REQUEST
-
-    logger.error("Unhandled service error: ", error=error)
-    return status.HTTP_500_INTERNAL_SERVER_ERROR
+    elif error is ServiceError.ACCOUNTS_NOT_FOUND:
+        return status.HTTP_404_NOT_FOUND
+    else:
+        logger.error("Unhandled service error: ", error=error)
+        return status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
 @router.post("/v1/accounts", response_model=Success[Account])
