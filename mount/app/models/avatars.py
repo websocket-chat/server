@@ -30,5 +30,6 @@ class Avatar(BaseModel):
     height: int
     filesize: int
     status: str
+    public_url: str
     created_at: datetime
     updated_at: datetime
