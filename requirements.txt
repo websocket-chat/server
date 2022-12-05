@@ -1,9 +1,12 @@
+aiobotocore
 aioredis
 bcrypt
 databases[aiomysql]
 email-validator
 fastapi
 orjson
+Pillow
+python-multipart
 python_dotenv
 structlog
 uvicorn

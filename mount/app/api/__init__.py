@@ -2,6 +2,7 @@ import time
 
 import aioredis
 import databases
+from aiobotocore.session import get_session
 from app.adapters.database import dsn
 from app.api.rest import router as rest_router
 from app.api.websocket import router as websocket_router
@@ -53,6 +54,26 @@ def init_redis(api: FastAPI) -> None:
         logger.info("Redis pool shut down")
 
 
+# TODO: can this be cleaned up?
+def init_s3_client(api: FastAPI) -> None:
+    @api.on_event("startup")
+    async def startup_s3_client() -> None:
+        session = get_session()
+        client = await session._create_client(  # type: ignore
+            service_name="s3",
+            region_name=settings.AWS_S3_BUCKET_REGION,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        )
+        api.state.s3_client = client
+        await api.state.s3_client.__aenter__()
+
+    @api.on_event("shutdown")
+    async def shutdown_s3_client() -> None:
+        await api.state.s3_client.__aexit__(None, None, None)
+        del api.state.s3_client
+
+
 def init_middlewares(api: FastAPI) -> None:
     # NOTE: these run bottom to top
 
@@ -66,6 +87,12 @@ def init_middlewares(api: FastAPI) -> None:
     @api.middleware("http")
     async def add_redis_to_request(request: Request, call_next):
         request.state.redis = request.app.state.redis
+        response = await call_next(request)
+        return response
+
+    @api.middleware("http")
+    async def add_s3_client_to_request(request: Request, call_next):
+        request.state.s3_client = request.app.state.s3_client
         response = await call_next(request)
         return response
 
@@ -102,6 +129,7 @@ def init_api() -> FastAPI:
 
     init_db(api)
     init_redis(api)
+    init_s3_client(api)
     init_middlewares(api)
     init_routes(api)
 

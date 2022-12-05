@@ -15,3 +15,7 @@ class ServiceError(str, Enum):
 
     CREDENTIALS_NOT_FOUND = "credentials.incorrect_credentials"
     CREDENTIALS_INCORRECT = "credentials.incorrect_credentials"
+
+    AVATARS_CONTENT_TYPE_INVALID = "avatars.content_type_invalid"
+    AVATARS_SIZE_TOO_LARGE = "avatars.size_too_large"
+    AVATARS_CREATE_FAILED = "avatars.create_failed"
