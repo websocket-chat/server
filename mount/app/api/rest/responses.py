@@ -19,18 +19,13 @@ class Cookie(typing.TypedDict, total=False):
     samesite: typing.Literal["lax", "strict", "none"]
 
 
-class Success(GenericModel, typing.Generic[T]):
-    status: typing.Literal["success"]
-    data: T
-
-
 def create_response(
-    data: typing.Mapping[str, typing.Any],
+    content: typing.Mapping[str, typing.Any],
     status_code: int,
     headers: dict[str, str] | None,
     cookies: typing.Iterable[Cookie] | None = None,
 ) -> ORJSONResponse:
-    response = ORJSONResponse(data, status_code, headers)
+    response = ORJSONResponse(content, status_code, headers)
 
     if cookies is None:
         cookies = []
@@ -41,20 +36,33 @@ def create_response(
     return response
 
 
+class Success(GenericModel, typing.Generic[T]):
+    status: typing.Literal["success"]
+    data: T
+
+
+def format_success(data: typing.Any) -> dict[str, typing.Any]:
+    return {"status": "success", "data": data}
+
+
 def success(
-    content: typing.Any,
+    data: typing.Any,
     status_code: int = 200,
     headers: dict | None = None,
     cookies: typing.Iterable[Cookie] | None = None,
 ) -> ORJSONResponse:
-    data = {"status": "success", "data": content}
-    return create_response(data, status_code, headers, cookies)
+    content = format_success(data)
+    return create_response(content, status_code, headers, cookies)
 
 
-class ErrorResponse(GenericModel, typing.Generic[T]):
+class Error(GenericModel, typing.Generic[T]):
     status: typing.Literal["error"]
     error: T
     message: str
+
+
+def format_failure(error: ServiceError, message: str) -> dict[str, typing.Any]:
+    return {"status": "error", "error": error, "message": message}
 
 
 def failure(
@@ -64,5 +72,5 @@ def failure(
     headers: dict | None = None,
     cookies: typing.Iterable[Cookie] | None = None,
 ) -> ORJSONResponse:
-    data = {"status": "error", "error": error, "message": message}
-    return create_response(data, status_code, headers, cookies)
+    content = format_failure(error, message)
+    return create_response(content, status_code, headers, cookies)
