@@ -9,8 +9,8 @@ from app.models.avatars import Breakpoint
 
 class AvatarsRepo:
     READ_PARAMS = """\
-        id, account_id, breakpoint, width, height, filesize, status, created_at,
-        updated_at
+        id, account_id, content_type, breakpoint, width, height, filesize,
+        status, created_at, updated_at
     """
 
     def __init__(self, ctx: Context) -> None:
@@ -23,12 +23,14 @@ class AvatarsRepo:
         height: int,
         filesize: int,
         breakpoint: Breakpoint,
+        content_type: str,
+        file_name: str,
         file_data: bytes,
     ) -> dict[str, typing.Any] | None:
         with io.BytesIO(file_data) as file_obj:
-            xd = await self.ctx.s3_client.put_object(
+            await self.ctx.s3_client.put_object(
                 Bucket=settings.AWS_S3_BUCKET_NAME,
-                Key=f"avatars/{account_id}/{breakpoint}",
+                Key=f"avatars/{account_id}/{file_name}",
                 Body=file_obj,
                 # TODO: Content-Type?
                 # TODO: Content-Encoding?
@@ -37,12 +39,13 @@ class AvatarsRepo:
             )
 
         query = """\
-            INSERT INTO avatars (account_id, breakpoint, width, height, filesize, status)
-                 VALUES (:account_id, :breakpoint, :width, :height, :filesize, :status)
+            INSERT INTO avatars (account_id, breakpoint, content_type, width, height, filesize, status)
+                 VALUES (:account_id, :breakpoint, :content_type, :width, :height, :filesize, :status)
         """
         params = {
             "account_id": account_id,
             "breakpoint": breakpoint,
+            "content_type": content_type,
             "width": width,
             "height": height,
             "filesize": filesize,

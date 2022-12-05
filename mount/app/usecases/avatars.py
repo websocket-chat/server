@@ -10,11 +10,6 @@ from fastapi import UploadFile
 from PIL import Image
 
 MAX_AVATAR_SIZE = 1024 * 1024 * 20  # 20 MB
-ALLOWED_AVATAR_CONTENT_TYPES = {
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-}
 
 BREAKPOINTS = {
     Breakpoint.ORIGINAL: (0, 0),
@@ -34,7 +29,13 @@ async def create(
 ) -> list[dict[str, typing.Any]] | ServiceError:
     repo = AvatarsRepo(ctx)
 
-    if upload_file.content_type not in ALLOWED_AVATAR_CONTENT_TYPES:
+    if upload_file.content_type == "image/jpeg":
+        extension = "jpeg"
+    elif upload_file.content_type == "image/png":
+        extension = "png"
+    elif upload_file.content_type == "image/webp":
+        extension = "webp"
+    else:
         return ServiceError.AVATARS_CONTENT_TYPE_INVALID
 
     await upload_file.seek(os.SEEK_SET)
@@ -62,6 +63,8 @@ async def create(
                 height=height,
                 filesize=len(resized_file_data),
                 breakpoint=breakpoint,
+                content_type=upload_file.content_type,
+                file_name=f"{breakpoint}.{extension}",
                 file_data=resized_file_data,
             )
             if avatar is None:

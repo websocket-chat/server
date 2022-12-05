@@ -2,6 +2,7 @@ CREATE TABLE avatars (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     account_id INT NOT NULL,
     breakpoint VARCHAR(255) NOT NULL,
+    content_type VARCHAR(255) NOT NULL,
     width INT NOT NULL,
     height INT NOT NULL,
     filesize INT NOT NULL,

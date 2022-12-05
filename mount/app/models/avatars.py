@@ -25,6 +25,7 @@ class Avatar(BaseModel):
     id: int
     account_id: int
     breakpoint: Breakpoint
+    content_type: str
     width: int
     height: int
     filesize: int
