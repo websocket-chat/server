@@ -1,2 +1,3 @@
 black
 pre-commit
+types-aiobotocore[s3]

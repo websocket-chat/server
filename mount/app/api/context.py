@@ -1,3 +1,4 @@
+from aiobotocore.client import AioBaseClient
 from aioredis import Redis
 from app.common.context import Context
 from databases import Database
@@ -17,6 +18,10 @@ class HTTPRequestContext(Context):
     def redis(self) -> Redis:
         return self.request.state.redis
 
+    @property
+    def s3_client(self) -> AioBaseClient:
+        return self.request.state.s3_client
+
 
 class WebSocketRequestContext(Context):
     def __init__(self, websocket: WebSocket) -> None:
@@ -29,3 +34,7 @@ class WebSocketRequestContext(Context):
     @property
     def redis(self) -> Redis:
         return self.websocket.app.state.redis
+
+    @property
+    def s3_client(self) -> AioBaseClient:
+        return self.websocket.app.state.s3_client

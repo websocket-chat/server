@@ -13,6 +13,7 @@ from starlette.status import HTTP_403_FORBIDDEN
 # just edited to use UUID instead of str for credentials (session_id) so that it
 # nicely handles 422 for me lol
 
+
 class HTTPAuthorizationCredentials(BaseModel):
     scheme: str
     credentials: UUID
